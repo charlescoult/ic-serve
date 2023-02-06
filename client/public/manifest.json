@@ -1,6 +1,6 @@
 {
-  "short_name": "Fungi",
-  "name": "Fungi Client",
+  "short_name": "React App",
+  "name": "Create React App Sample",
   "icons": [
     {
       "src": "favicon.ico",
@@ -21,8 +21,5 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff",
-  "author": "Charles Coulter",
-  "description": "Idenitify your world.",
-  "version": "0.0.4"
+  "background_color": "#ffffff"
 }
