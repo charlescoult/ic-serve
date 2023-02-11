@@ -15,6 +15,20 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['react', '@typescript-eslint'],
-  rules: {},
+  plugins: ['react', '@typescript-eslint', 'import-newlines'],
+  rules: {
+    // 'max-len': ['error', 80],
+    // semi: ['error', 'never'],
+    // 'object-curly-newline': ['error', 'always'],
+    indent: ['warn', 2],
+    /*'import-newlines/enforce': [
+      'error',
+      {
+        items: 1,
+        'max-len': 80,
+        semi: false,
+      },
+    ],
+    */
+  },
 }

@@ -1,12 +1,17 @@
 import React from 'react'
 
-import { Box, Typography } from '@mui/material'
+import {
+  Box,
+  Typography
+} from '@mui/material'
 
 import WolfImage from 'wolf.svg'
 
 // import { useGoogleRecaptchaVerify } from 'utility'
 
-const NotFound = ({ ...props }) => {
+const NotFound = ({
+  ...props 
+}) => {
   return (
     <Box
       sx={{
@@ -17,11 +22,17 @@ const NotFound = ({ ...props }) => {
         height: '1',
       }}
     >
-      <Typography align="center" variant="h5">
+      <Typography
+        align="center"
+        variant="h5"
+      >
         This is not the page you are looking for...
       </Typography>
 
-      <img alt="notFoundImage" src={WolfImage} />
+      <img
+        alt="notFoundImage"
+        src={WolfImage}
+      />
     </Box>
   )
 }

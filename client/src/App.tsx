@@ -1,6 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, {
+  useState,
+  useEffect
+} from 'react'
 
-import { Routes, Route } from 'react-router-dom'
+import {
+  Routes,
+  Route
+} from 'react-router-dom'
 
 /* Routes */
 // import ObjectivityApp from 'objectivity'
@@ -9,15 +15,59 @@ import { Routes, Route } from 'react-router-dom'
 import NotFoundPage from 'pages/notFound.page'
 import HomePage from 'pages/home.page'
 
-const App = ({ ...props }) => {
-  return (
-    <>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
+/* Components */
+// import Sidebar from 'components/sidebar'
 
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </>
+import { createTheme } from 'theme'
+
+import {
+  Box,
+  Container,
+  Drawer,
+  Button,
+  CssBaseline,
+  Paper
+} from '@mui/material'
+import { ThemeProvider } from '@mui/material/styles'
+
+const App = ({
+  ...props 
+}) => {
+  const theme = createTheme()
+
+  return (
+    <React.Fragment key="anchor">
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+
+        { /* TODO ConditionalWrapper based on isMobile */ }
+        <Container
+          component={ Paper }
+          elevation={ 3 }
+          fixed
+          disableGutters
+          sx={ {
+            overflow: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+          } }
+        >
+          <Routes>
+            <Route
+              path="/"
+              element={<HomePage />}
+            />
+
+            <Route
+              path="*"
+              element={<NotFoundPage />}
+            />
+          </Routes>
+        </Container>
+
+
+      </ThemeProvider>
+    </React.Fragment>
   )
 }
 

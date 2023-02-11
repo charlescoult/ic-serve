@@ -1,16 +1,70 @@
-import React, { useContext } from 'react'
+import React, { useState, useContext } from 'react'
 
-import { Box } from '@mui/material'
+import { useForm } from 'react-hook-form'
 
-const HomePage = ({ ...props }) => {
+import { 
+  Stack,
+  Box,
+  Button,
+  TextField,
+} from '@mui/material'
+
+type FormData = {
+  name: string
+}
+
+const HomePage = ({
+  ...props 
+}) => {
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<FormData>()
+
+  const [ submitting, setSubmitting ] = useState( false )
+
+  const onSubmit = data => {
+    console.log(data)
+    setSubmitting( true )
+    // run query
+    setSubmitting( false )
+  }
+
+  // console.log(watch("example"))
+
   return (
     <Box
       sx={{
-        paddingX: 2,
-        paddingBottom: 1,
+        padding: 2,
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      Hello World
+      <Stack
+        component='form'
+        spacing={ 2 }
+        onSubmit={ handleSubmit( onSubmit ) }
+      >
+
+        <TextField
+          label='URL'
+          disabled={ submitting }
+          error={ !!errors.example }
+          { ...register( 'example', {
+          } ) }
+        />
+
+
+        <Button
+          type="submit"
+        >
+          test
+        </Button>
+      </Stack>
+
     </Box>
   )
 }
