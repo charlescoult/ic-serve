@@ -3,6 +3,12 @@ import React, { useEffect, useState, useContext, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 
 import { 
+  Select,
+  MenuItem,
+  Divider,
+  Alert,
+  Skeleton,
+  Paper,
   Typography,
   Container,
   Stack,
@@ -12,8 +18,7 @@ import {
   LinearProgress,
 } from '@mui/material'
 
-import '@tensorflow/tfjs-backend-webgl'
-
+// import '@tensorflow/tfjs-backend-webgl'
 import * as tf from '@tensorflow/tfjs'
 
 import * as MobileNet from '@tensorflow-models/mobilenet'
@@ -21,6 +26,7 @@ import * as MobileNet from '@tensorflow-models/mobilenet'
 // https://dev.to/omrigm/run-machine-learning-models-in-your-browser-with-tensorflow-js-reactjs-48pe
 
 const modelUrl = ""
+const defaultNumResults = 5
 
 const HomePage = ({
   ...props 
@@ -29,20 +35,20 @@ const HomePage = ({
   const [ model, setModel ] = useState(undefined)
 
   /*
-  const loadModel = async url => {
-    try {
-      const model = await tf.loadLayersModel(url)
-      setModel(model)
-    } catch (err) {
-      console.log( err )
-    }
-  }
+     const loadModel = async url => {
+     try {
+     const model = await tf.loadLayersModel(url)
+     setModel(model)
+     } catch (err) {
+     console.log( err )
+     }
+     }
 
-  useEffect( () => {
-    tf.ready().then( () => {
-      loadModel(modelUrl)
-    } )
-  }, [] )
+     useEffect( () => {
+     tf.ready().then( () => {
+     loadModel(modelUrl)
+     } )
+     }, [] )
    */
 
   useEffect( () => {
@@ -74,9 +80,14 @@ const HomePage = ({
   const [ image, setImage ] = useState( undefined )
 
   const [ results, setResults ] = useState( undefined )
+  const [ numResults, setNumResults ] = useState( defaultNumResults )
+  const [ error, setError ] = useState( undefined )
+
+  const watchFileUpload = watch("file")
 
   const onSubmit = async data => {
     setSubmitting( true )
+    setError(undefined)
 
     // load image preview
     let image = undefined
@@ -91,6 +102,7 @@ const HomePage = ({
 
     reset()
 
+    // await new Promise( res => setTimeout(res, 3000) )
 
     // https://www.oreilly.com/library/view/learning-tensorflowjs/9781492090786/ch04.html
     const imageData = new Image()
@@ -103,114 +115,232 @@ const HomePage = ({
       )
       const predictions = model.classify(
         imageTensor,
-        5
+        numResults,
       ).then( res => {
-        console.log(res)
         setResults(res)
       } ).catch( err => {
-        console.err(err)
+        /* Error retrieving prediction from model */
+        console.error(err)
+        setImage(undefined)
+        setResults(undefined)
+        setError({
+          message: "Error retrieving prediction from model",
+        } )
+      } ).finally( () => {
+        setSubmitting(false)
       } )
     }
-
-    setSubmitting(false)
-    // run query
+    imageData.onerror = err => {
+      /* Error loading image */
+      console.error(err)
+      setImage(undefined)
+      setResults(undefined)
+      setError( {
+        message: "Error loading file:",
+        file: image,
+      } )
+      setSubmitting(false)
+    }
 
   }
 
-  return (
-    <Box
-      sx={{
-        padding: 2,
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <Stack
-        component='form'
-        spacing={ 2 }
-        padding={ 2 } 
-        alignItems="center"
-        onSubmit={ handleSubmit( onSubmit ) }
-      >
+  console.log("render")
 
-        <TextField
-          sx={ {
-            alignSelf: 'stretch'
-          } }
-          label='URL'
-          disabled={ submitting }
-          error={ !!errors.url }
-          { ...register( 'url', {
-          } ) }
+  return (
+    <Stack
+      component='form'
+      spacing={ 2 }
+      alignItems="stretch"
+      onSubmit={ handleSubmit( onSubmit ) }
+    >
+
+      <Paper
+        elevation={3}
+      >
+        <Typography
+          variant='h5'
+          margin={ 2 }
+        >
+          Model
+        </Typography>
+
+        <Divider
+        />
+        <Stack
+          spacing={ 2 }
+          alignItems="center"
+          padding={ 2 }
+        >
+          <Select
+            label="Select Model"
+            value={ 10 }
+          >
+            <MenuItem
+              value={ 10 }
+            >
+              10
+            </MenuItem>
+          </Select>
+        </Stack>
+      </Paper>
+
+      <Paper
+        elevation={3}
+      >
+        <Typography
+          variant='h5'
+          margin={ 2 }
+        >
+          Input
+        </Typography>
+
+        <Divider
         />
 
-        <Button
-          disabled={ submitting }
-          variant="outlined"
-          component="label"
+        <Stack
+          spacing={ 2 }
+          alignItems="center"
+          padding={ 2 }
         >
-          Upload File
-          <input
-            hidden
-            accept="image/*"
-            type="file"
-            { ...register('file') }
+
+          <TextField
+            sx={ {
+              alignSelf: 'stretch'
+            } }
+            label='URL'
+            disabled={ submitting }
+            error={ !!errors.url }
+            { ...register( 'url', {
+            } ) }
           />
-        </Button>
 
-        <Button
-          disabled={ submitting }
-          variant="contained"
-          type="submit"
-        >
-          Submit
-        </Button>
-
-        { image &&
-          ( 
-            <Container
-              disableGutters
-              component='img'
-              src={ image }
+          <Button
+            disabled={ submitting }
+            variant="outlined"
+            component="label"
+          >
+            {
+              'Load Local File' + ( watchFileUpload && watchFileUpload.length > 0 ? ": " + watchFileUpload[0].name : '')
+            }
+            <input
+              hidden
+              accept="image/*"
+              type="file"
+              { ...register('file') }
             />
-          )
-        }
+          </Button>
 
-        { results && 
-          (
+          { error && (
+            <Alert severity="error">
+              { error.message }
+              { error.file && (
+                <>
+                  <br/>
+                  { error.file }
+                </>
+              ) }
+            </Alert>
+          ) }
+
+          <Button
+            disabled={ submitting }
+            variant="contained"
+            type="submit"
+          >
+            Classify
+          </Button>
+        </Stack>
+
+      </Paper>
+
+      { ( submitting || results ) && 
+        (
+          <Paper
+            elevation={3}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+        <Typography
+          variant='h5'
+          margin={ 2 }
+        >
+          Output
+        </Typography>
+
+        <Divider
+        />
             <Stack
+              padding={ 2 }
               direction="column"
               alignItems="stretch"
               spacing={ 2 }
               sx={ { width: '100%' } }
             >
-              { results.map( result => (
-                <Box
-                  key={ result.className }
-                >
-                  <Typography
-                    variant='h6'
-                    align='center'
+              { submitting && 
+                [...Array(numResults)].map( (e, i) => (
+                  <Box
+                    key={ 'results.skeleton' + i }
                   >
-                    { result.className + ": " + ( 100 * result.probability ).toFixed(2) + '%' }
-                  </Typography>
-                  <LinearProgress
-                    key={ result.className }
-                    variant="determinate"
-                    value={ 100 * result.probability }
-                    sx={ {
-                    } }
+                    <Typography
+                      variant='h6'
+                      align='center'
+                    >
+                      <Skeleton /> 
+                    </Typography>
+                  </Box>
+              ) ) || 
+                results.map( result => (
+                  <Box
+                    key={ 'results.' + result.className }
                   >
-                  </LinearProgress>
-                </Box>
+                    <Typography
+                      variant='h6'
+                      align='center'
+                    >
+                      { submitting ?
+                        <Skeleton /> : 
+                        result.className + ": " + ( 100 * result.probability ).toFixed(2) + '%'
+                      }
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={ 100 * result.probability }
+                    />
+                  </Box>
               ) ) }
             </Stack>
-        )
-        }
+          </Paper>
+      ) }
 
-      </Stack>
+      { ( submitting || image ) &&
+        ( 
+          <Paper
+            elevation={3}
+            sx={{
+              padding: 2,
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            { submitting && 
+              (
+                <Skeleton
+                  variant='rectangular'
+                  height={ 300 }
+                />
+            ) || (
+              <Container
+                disableGutters
+                component='img'
+                src={ image }
+              />
+            ) }
+          </Paper>
+        ) }
 
-    </Box>
+    </Stack>
   )
 }
 

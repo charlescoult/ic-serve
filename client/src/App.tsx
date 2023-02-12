@@ -42,13 +42,10 @@ const App = ({
 
         { /* TODO ConditionalWrapper based on isMobile */ }
         <Container
-          component={ Paper }
           elevation={ 3 }
           fixed
-          disableGutters
           sx={ {
             marginY: 2,
-            overflow: 'auto',
             display: 'flex',
             flexDirection: 'column',
           } }
