@@ -47,6 +47,7 @@ const App = ({
           fixed
           disableGutters
           sx={ {
+            marginY: 2,
             overflow: 'auto',
             display: 'flex',
             flexDirection: 'column',
