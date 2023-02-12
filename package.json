@@ -2,6 +2,16 @@
   "name": "fungi-client",
   "packageManager": "yarn@3.4.1",
   "private": true,
+  "scripts": {
+    "build:client": "cd client && yarn build",
+    "build": "yarn build:client",
+    "start:dev:client": "cd client && yarn start:dev",
+    "start:dev:server": "cd server && yarn start:dev",
+    "start:dev": "cd server && yarn start:dev",
+    "start:staging": "cd server && yarn start:staging",
+    "start:prod": "cd server && yarn start:prod",
+    "start": "cd server && yarn start"
+  },
   "workspaces": [
     "client",
     "server"
