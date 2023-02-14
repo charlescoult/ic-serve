@@ -1,7 +1,4 @@
-import {
-  createTheme as muiCreateTheme,
-  alpha
-} from '@mui/material/styles'
+import { createTheme as muiCreateTheme, alpha } from '@mui/material/styles'
 
 // import * as materialColors from '@mui/material/colors'
 
@@ -116,8 +113,7 @@ const createTheme = (options = defaultThemeOptions) => {
   theme = muiCreateTheme(theme, {
     components: {
       MuiTable: {
-        styleOverrides: {
-        },
+        styleOverrides: {},
       },
     },
   })
@@ -125,8 +121,6 @@ const createTheme = (options = defaultThemeOptions) => {
   return theme
 }
 
-export {
-  createTheme 
-}
+export { createTheme }
 
 export default createTheme()

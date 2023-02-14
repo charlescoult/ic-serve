@@ -1,12 +1,6 @@
-import React, {
-  useState,
-  useEffect
-} from 'react'
+import React, { useState, useEffect } from 'react'
 
-import {
-  Routes,
-  Route
-} from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 
 /* Routes */
 // import ObjectivityApp from 'objectivity'
@@ -26,13 +20,11 @@ import {
   Drawer,
   Button,
   CssBaseline,
-  Paper
+  Paper,
 } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 
-const App = ({
-  ...props 
-}) => {
+const App = ({ ...props }) => {
   const theme = createTheme()
 
   return (
@@ -40,15 +32,15 @@ const App = ({
       <ThemeProvider theme={theme}>
         <CssBaseline />
 
-        { /* TODO ConditionalWrapper based on isMobile */ }
+        {/* TODO ConditionalWrapper based on isMobile */}
         <Container
-          elevation={ 3 }
+          elevation={3}
           fixed
-          sx={ {
+          sx={{
             marginY: 2,
             display: 'flex',
             flexDirection: 'column',
-          } }
+          }}
         >
           <Routes>
             <Route
@@ -62,8 +54,6 @@ const App = ({
             />
           </Routes>
         </Container>
-
-
       </ThemeProvider>
     </React.Fragment>
   )

@@ -1,17 +1,12 @@
 import React from 'react'
 
-import {
-  Box,
-  Typography
-} from '@mui/material'
+import { Box, Typography } from '@mui/material'
 
 import WolfImage from 'wolf.svg'
 
 // import { useGoogleRecaptchaVerify } from 'utility'
 
-const NotFound = ({
-  ...props 
-}) => {
+const NotFound = ({ ...props }) => {
   return (
     <Box
       sx={{
