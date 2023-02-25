@@ -6,6 +6,8 @@ import axios from 'axios'
 import fs from 'fs'
 import compression from 'compression'
 
+import API from './api/api.js'
+
 // Test if .env file exists
 /*
 try { 
@@ -31,6 +33,8 @@ app.use( BodyParser.json() )
 app.use( BodyParser.urlencoded( {
   extended: true,
 } ) )
+
+API( app )
 
 if ( process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging' ) {
 

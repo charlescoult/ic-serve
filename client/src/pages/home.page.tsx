@@ -25,6 +25,9 @@ import * as tf from '@tensorflow/tfjs'
 
 import * as MobileNet from '@tensorflow-models/mobilenet'
 import * as TestNet from 'models/test/test'
+import * as FungiNet from 'models/gbif/test'
+
+import LoadModelService from 'services/loadModelService'
 
 // https://dev.to/omrigm/run-machine-learning-models-in-your-browser-with-tensorflow-js-reactjs-48pe
 const modelUrl = 'models/test/model.json'
@@ -38,6 +41,10 @@ const models = [
   {
     'name': 'TestNet',
     'modelBase': TestNet,
+  },
+  {
+    'name': 'FungiNet',
+    'modelBase': FungiNet,
   },
 ]
 
@@ -189,7 +196,6 @@ const HomePage = ({ ...props }) => {
                   Select a model
                 </InputLabel>
                 <Select
-                  fullWidth
                   labelId='modelSelection-label'
                   label="Select Field"
                   { ...field }
