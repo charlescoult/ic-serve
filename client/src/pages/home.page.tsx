@@ -26,6 +26,7 @@ import * as tf from '@tensorflow/tfjs'
 import * as MobileNet from '@tensorflow-models/mobilenet'
 import * as TestNet from 'models/test/test'
 import * as FungiNet from 'models/gbif/test'
+import * as S3Net from 'models/s3/test'
 
 import LoadModelService from 'services/loadModelService'
 
@@ -45,6 +46,10 @@ const models = [
   {
     'name': 'FungiNet',
     'modelBase': FungiNet,
+  },
+  {
+    'name': 'S3Net',
+    'modelBase': S3Net,
   },
 ]
 
@@ -70,7 +75,6 @@ const HomePage = ({ ...props }) => {
 
   /* ### MODEL ### */
   const modelSelection = watch('modelSelection')
-  console.log(modelSelection)
   // Model after it has been set and loaded
   const [ loadedModel, setLoadedModel ] = useState(undefined)
   const [ loadingModel, setLoadingModel ] = useState(false)
@@ -78,6 +82,7 @@ const HomePage = ({ ...props }) => {
   /* Whenever modelBase gets changed, load new model */
   useEffect(() => {
     const loadModel = async () => {
+      setError(undefined)
       setLoadingModel(true)
       console.log("loading Model")
       models[modelSelection].modelBase.load().then( model => {
@@ -85,8 +90,6 @@ const HomePage = ({ ...props }) => {
         setLoadedModel(model)
         setLoadingModel(false)
       } ).catch(error => {
-        console.log("ERRORR")
-        console.log(error)
         setError({
           message: 'Error loading model',
         })
@@ -350,7 +353,7 @@ const HomePage = ({ ...props }) => {
           >
             {(submitting &&
               [...Array(numResults)].map((e, i) => (
-                <Box key={'results.skeleton' + i}>
+                <Box key={ 'results.skeleton' + i }>
                   <Typography
                     variant="h6"
                     align="center"
@@ -359,8 +362,8 @@ const HomePage = ({ ...props }) => {
                   </Typography>
                 </Box>
             ))) ||
-              results.map((result) => (
-                <Box key={'results.' + result.className}>
+              results.map((result, i) => (
+                <Box key={ 'results.' + ( result.className || ( 'undefined-' + i ) ) }>
                   <Typography
                     variant="h6"
                     align="center"
