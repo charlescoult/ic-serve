@@ -8,10 +8,10 @@
     "build:client": "cd .. && yarn build:client",
     "build": "yarn build:client",
     "start:dev:client": "cd .. && yarn start:dev:client",
-    "start:dev:server": "nodemon -r dotenv/config server.js",
+    "start:dev:server": "nodemon server.js",
     "start:dev": "NODE_ENV=development concurrently --kill-others-on-fail \"yarn start:dev:server\" \"yarn start:dev:client\"",
-    "start:staging": "NODE_ENV=staging node -r dotenv/config server.js",
-    "start:prod": "NODE_ENV=production node -r dotenv/config server.js",
+    "start:staging": "NODE_ENV=staging node server.js",
+    "start:prod": "NODE_ENV=production node server.js",
     "start": "yarn start:prod"
   },
   "dependencies": {
