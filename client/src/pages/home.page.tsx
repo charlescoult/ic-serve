@@ -39,7 +39,7 @@ const models = [
     'modelBase': MobileNet,
   },
   {
-    'name': 'TestNet',
+    'name': 'BirdNet',
     'modelBase': TestNet,
   },
   {
@@ -73,17 +73,28 @@ const HomePage = ({ ...props }) => {
   console.log(modelSelection)
   // Model after it has been set and loaded
   const [ loadedModel, setLoadedModel ] = useState(undefined)
+  const [ loadingModel, setLoadingModel ] = useState(false)
 
   /* Whenever modelBase gets changed, load new model */
   useEffect(() => {
     const loadModel = async () => {
+      setLoadingModel(true)
       console.log("loading Model")
       models[modelSelection].modelBase.load().then( model => {
         console.log("done loading  Model")
         setLoadedModel(model)
+        setLoadingModel(false)
+      } ).catch(error => {
+        console.log("ERRORR")
+        console.log(error)
+        setError({
+          message: 'Error loading model',
+        })
+        setLoadingModel(false)
       } )
     }
-    loadModel().catch(console.error)
+
+    loadModel()
   }, [ modelSelection ])
 
   const [submitting, setSubmitting] = useState(false)
@@ -189,7 +200,9 @@ const HomePage = ({ ...props }) => {
             name="modelSelection"
             control={ control }
             render={ ({ field }) => (
-              <FormControl>
+              <FormControl
+                disabled={ submitting || loadingModel }
+              >
                 <InputLabel
                   id='modelSelection-label'
                 >
@@ -197,7 +210,7 @@ const HomePage = ({ ...props }) => {
                 </InputLabel>
                 <Select
                   labelId='modelSelection-label'
-                  label="Select Field"
+                  label="Select a model"
                   { ...field }
                 >
                   {
@@ -268,13 +281,13 @@ const HomePage = ({ ...props }) => {
               alignSelf: 'stretch',
             }}
             label="URL"
-            disabled={submitting}
+            disabled={ submitting || loadingModel }
             error={!!errors.url}
             {...register('url', {})}
           />
 
           <Button
-            disabled={submitting}
+            disabled={ submitting || loadingModel }
             variant="outlined"
             component="label"
           >
@@ -303,7 +316,7 @@ const HomePage = ({ ...props }) => {
           )}
 
           <Button
-            disabled={submitting}
+            disabled={ submitting || loadingModel }
             variant="contained"
             type="submit"
           >
