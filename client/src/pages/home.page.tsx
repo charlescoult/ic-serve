@@ -26,6 +26,7 @@ import * as tf from '@tensorflow/tfjs'
 import * as MobileNet from '@tensorflow-models/mobilenet'
 import * as TestNet from 'models/test/test'
 import * as FungiNet from 'models/gbif/test'
+import * as S3Net from 'models/s3/test'
 
 import LoadModelService from 'services/loadModelService'
 
@@ -39,12 +40,16 @@ const models = [
     'modelBase': MobileNet,
   },
   {
-    'name': 'TestNet',
+    'name': 'BirdNet',
     'modelBase': TestNet,
   },
   {
     'name': 'FungiNet',
     'modelBase': FungiNet,
+  },
+  {
+    'name': 'S3Net',
+    'modelBase': S3Net,
   },
 ]
 
@@ -70,20 +75,29 @@ const HomePage = ({ ...props }) => {
 
   /* ### MODEL ### */
   const modelSelection = watch('modelSelection')
-  console.log(modelSelection)
   // Model after it has been set and loaded
   const [ loadedModel, setLoadedModel ] = useState(undefined)
+  const [ loadingModel, setLoadingModel ] = useState(false)
 
   /* Whenever modelBase gets changed, load new model */
   useEffect(() => {
     const loadModel = async () => {
+      setError(undefined)
+      setLoadingModel(true)
       console.log("loading Model")
       models[modelSelection].modelBase.load().then( model => {
         console.log("done loading  Model")
         setLoadedModel(model)
+        setLoadingModel(false)
+      } ).catch(error => {
+        setError({
+          message: 'Error loading model',
+        })
+        setLoadingModel(false)
       } )
     }
-    loadModel().catch(console.error)
+
+    loadModel()
   }, [ modelSelection ])
 
   const [submitting, setSubmitting] = useState(false)
@@ -189,7 +203,9 @@ const HomePage = ({ ...props }) => {
             name="modelSelection"
             control={ control }
             render={ ({ field }) => (
-              <FormControl>
+              <FormControl
+                disabled={ submitting || loadingModel }
+              >
                 <InputLabel
                   id='modelSelection-label'
                 >
@@ -197,7 +213,7 @@ const HomePage = ({ ...props }) => {
                 </InputLabel>
                 <Select
                   labelId='modelSelection-label'
-                  label="Select Field"
+                  label="Select a model"
                   { ...field }
                 >
                   {
@@ -268,13 +284,13 @@ const HomePage = ({ ...props }) => {
               alignSelf: 'stretch',
             }}
             label="URL"
-            disabled={submitting}
+            disabled={ submitting || loadingModel }
             error={!!errors.url}
             {...register('url', {})}
           />
 
           <Button
-            disabled={submitting}
+            disabled={ submitting || loadingModel }
             variant="outlined"
             component="label"
           >
@@ -303,7 +319,7 @@ const HomePage = ({ ...props }) => {
           )}
 
           <Button
-            disabled={submitting}
+            disabled={ submitting || loadingModel }
             variant="contained"
             type="submit"
           >
@@ -337,7 +353,7 @@ const HomePage = ({ ...props }) => {
           >
             {(submitting &&
               [...Array(numResults)].map((e, i) => (
-                <Box key={'results.skeleton' + i}>
+                <Box key={ 'results.skeleton' + i }>
                   <Typography
                     variant="h6"
                     align="center"
@@ -346,8 +362,8 @@ const HomePage = ({ ...props }) => {
                   </Typography>
                 </Box>
             ))) ||
-              results.map((result) => (
-                <Box key={'results.' + result.className}>
+              results.map((result, i) => (
+                <Box key={ 'results.' + ( result.className || ( 'undefined-' + i ) ) }>
                   <Typography
                     variant="h6"
                     align="center"
