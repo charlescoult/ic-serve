@@ -20,38 +20,14 @@ import {
   LinearProgress,
 } from '@mui/material'
 
-// import '@tensorflow/tfjs-backend-webgl'
 import * as tf from '@tensorflow/tfjs'
 
-import * as MobileNet from '@tensorflow-models/mobilenet'
-import * as TestNet from 'models/test/test'
-import * as FungiNet from 'models/gbif/test'
-import * as S3Net from 'models/s3/test'
-
-import LoadModelService from 'services/loadModelService'
-
-// https://dev.to/omrigm/run-machine-learning-models-in-your-browser-with-tensorflow-js-reactjs-48pe
-const modelUrl = 'models/test/model.json'
 const defaultNumResults = 5
 
-const models = [
-  {
-    'name': 'MobileNet',
-    'modelBase': MobileNet,
-  },
-  {
-    'name': 'BirdNet',
-    'modelBase': TestNet,
-  },
-  {
-    'name': 'FungiNet',
-    'modelBase': FungiNet,
-  },
-  {
-    'name': 'S3Net',
-    'modelBase': S3Net,
-  },
-]
+import models from 'models/models'
+import Model, {
+  ModelMetadata,
+} from 'models/model'
 
 const defaultModelSelection = 0
 
@@ -72,9 +48,12 @@ const HomePage = ({ ...props }) => {
     },
   })
 
+  console.log(models)
+
 
   /* ### MODEL ### */
   const modelSelection = watch('modelSelection')
+  console.log(modelSelection)
   // Model after it has been set and loaded
   const [ loadedModel, setLoadedModel ] = useState(undefined)
   const [ loadingModel, setLoadingModel ] = useState(false)
@@ -85,11 +64,12 @@ const HomePage = ({ ...props }) => {
       setError(undefined)
       setLoadingModel(true)
       console.log("loading Model")
-      models[modelSelection].modelBase.load().then( model => {
+      models[modelSelection].load().then( model => {
         console.log("done loading  Model")
         setLoadedModel(model)
         setLoadingModel(false)
       } ).catch(error => {
+        console.log(error)
         setError({
           message: 'Error loading model',
         })
@@ -215,14 +195,17 @@ const HomePage = ({ ...props }) => {
                   labelId='modelSelection-label'
                   label="Select a model"
                   { ...field }
+                  sx={ {
+                    minWidth: 200,
+                  } }
                 >
                   {
                     models.map( (model, index) => (
                       <MenuItem
-                        key={ 'key.modelSelection.' + model.name }
+                        key={ 'key.modelSelection.' + model.metadata.name }
                         value={ index }
                       >
-                        { model.name }
+                        { model.metadata.name }
                       </MenuItem>
                     ) ) }
                 </Select>
@@ -230,36 +213,22 @@ const HomePage = ({ ...props }) => {
             ) }
           />
 
-          { /*
-               <FormControl
-               fullWidth
-               >
-               <InputLabel
-               id='model-select-label'
-               >
-               Select a Model
-               </InputLabel>
-               <Select
-               labelId='model-select-label'
-               id='model-select'
-               defaultValue={ selectedModel }
-               value={ selectedModel }
-               label='Select a model'
-               onChange={ event => setModel( event.target.value ) }
-               >
-               {
-               models.map( (model, index) => (
-               <MenuItem
-               key={ model.name }
-               value={ model }
-               >
-               { model.name }
-               </MenuItem>
-               ) ) }
-               </Select>
-               </FormControl>
-             */ }
-
+          { loadingModel ? (
+            <Typography>
+              Loading Model...
+            </Typography>
+          ) : (
+            <Box>
+              <Typography
+                variant="h6"
+              >
+                Model Attributes
+              </Typography>
+              <Typography>
+                { "" + loadedModel }
+              </Typography>
+            </Box>
+          ) }
 
         </Stack>
       </Paper>
