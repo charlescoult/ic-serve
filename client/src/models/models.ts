@@ -3,15 +3,27 @@ import Model, {
   ModelMetadata,
   ModelSource,
 } from 'models/model'
+import * as ts from 'typescript'
+
+import * as MobileNet from '@tensorflow-models/mobilenet'
 
 const models = [
+
+  // #######################################################
   new Model(
-    async () => {
+    async onProgressCallback => {
       const url = 'models/test/model.json'
-      return tf.loadGraphModel( url )
+      onProgressCallback('test')
+      return tf.loadGraphModel(
+        url,
+        {
+          onProgress: onProgressCallback,
+        },
+      )
     },
     0,
     1,
+    299,
     async () => {
       const resp = await fetch( 'models/test/classes.json' ) 
       return await resp.json()
@@ -22,26 +34,32 @@ const models = [
       128,
     ),
   ),
+
+  // #######################################################
   /* tfhub - imagenet/mobilenet_v2_130_224/classification */
   new Model(
-    async () => {
-      const url = 'https://tfhub.dev/google/imagenet/mobilenet_v1_025_224/classification/1'
-      return tf.loadGraphModel( url, { fromTFHub: true } )
+    async onProgressCallback => {
+
+      onProgressCallback(0)
+      const mobileNet = await MobileNet.load()
+      onProgressCallback(1)
+      return mobileNet.model
     },
     -1,
     1,
+    224,
     async () => {
-      const resp = await fetch( 'https://storage.googleapis.com/download.te    nsorflow.org/data/ImageNetLabels.txt' )
-      console.log(resp)
-      return resp.split('\n')
+      const class_catalog = await fetch( 'class_catalogs/imagenet.class_catalog.json' )
+      return await class_catalog.json()
     },
     new ModelMetadata(
-      'tfhub.dev - MobileNet v2',
+      '@tensorflow-models/mobilenet',
       ModelSource.TFHub,
       20.55,
     ),
-
+    true,
   ),
+
 ]
 
 

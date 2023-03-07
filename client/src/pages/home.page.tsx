@@ -48,28 +48,30 @@ const HomePage = ({ ...props }) => {
     },
   })
 
-  console.log(models)
-
-
   /* ### MODEL ### */
   const modelSelection = watch('modelSelection')
-  console.log(modelSelection)
   // Model after it has been set and loaded
-  const [ loadedModel, setLoadedModel ] = useState(undefined)
+  const [ loadedModel, setLoadedModel ] = useState(models[defaultModelSelection])
   const [ loadingModel, setLoadingModel ] = useState(false)
 
   /* Whenever modelBase gets changed, load new model */
   useEffect(() => {
     const loadModel = async () => {
+      setImage(undefined)
+      setResults(undefined)
       setError(undefined)
       setLoadingModel(true)
       console.log("loading Model")
-      models[modelSelection].load().then( model => {
+      models[modelSelection].load(
+        progress => {
+          console.log(progress)
+        }
+      ).then( model => {
         console.log("done loading  Model")
-        setLoadedModel(model)
+        setLoadedModel(models[modelSelection])
         setLoadingModel(false)
       } ).catch(error => {
-        console.log(error)
+        console.error(error)
         setError({
           message: 'Error loading model',
         })
@@ -218,14 +220,38 @@ const HomePage = ({ ...props }) => {
               Loading Model...
             </Typography>
           ) : (
-            <Box>
+            <Box
+              sx={ {
+                flexGrow: 1,
+                alignSelf: 'flex-start',
+              } }
+            >
               <Typography
                 variant="h6"
               >
-                Model Attributes
+                { loadedModel.metadata.name }
               </Typography>
               <Typography>
-                { "" + loadedModel }
+                { "inputMin: " + loadedModel.inputMin }
+              </Typography>
+              <Typography>
+                { "inputMax: " + loadedModel.inputMax }
+              </Typography>
+              <Typography>
+                { "image_size: " + loadedModel.image_size }
+              </Typography>
+              <Typography>
+                { "Model size: " + loadedModel.metadata.size + ' mB' }
+              </Typography>
+              <Typography>
+                { "image_size: " + loadedModel.image_size }
+              </Typography>
+              <Typography>
+                { loadedModel.classes ? (
+                  "# of classes: " + loadedModel.classes.length
+                ) : (
+                "Model not loaded yet..."
+                ) }
               </Typography>
             </Box>
           ) }
