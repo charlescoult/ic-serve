@@ -3,11 +3,10 @@ import * as tf from '@tensorflow/tfjs'
 
 // import { CLASSES } from './classes'
 const classes_url = "https://fungi-models.s3.us-west-1.amazonaws.com/GBIF/google.inaturalist.inception_v3.03/classes.json"
-
+const model_url = "https://fungi-models.s3.us-west-1.amazonaws.com/GBIF/2023_03_30-07_22_16/model.json"
 
 
 const IMAGE_SIZE = 299
-const NUM_CLASSES = 200
 
 export async function load(): Promise<ImageClassifierModel> {
   if (tf == null) {
@@ -24,7 +23,7 @@ export async function load(): Promise<ImageClassifierModel> {
   const CLASSES = await response.json()
 
   const model = new ImageClassifierModelImpl(
-    "https://fungi-models.s3.us-west-1.amazonaws.com/GBIF/google.inaturalist.inception_v3.03/model.json",
+    model_url,
     inputMin,
     inputMax,
     CLASSES,
@@ -134,12 +133,14 @@ class ImageClassifierModelImpl implements ImageClassifierModel {
       // Reshape so we can pass it to predict.
       const batched = tf.reshape(resized, [-1, IMAGE_SIZE, IMAGE_SIZE, 3])
 
-      const logits1001 = this.model.predict(batched) as tf.Tensor2D
+      const logits = this.model.predict(batched) as tf.Tensor2D
 
       // Remove the very first logit (background noise).
       //const result: tf.Tensor2D = tf.slice(logits1001, [0, 1], [-1, NUM_CLASSES - 1])
 
-      return logits1001
+      const logits_softmax = tf.softmax( logits )
+
+      return logits_softmax
     })
   }
 
@@ -162,6 +163,7 @@ class ImageClassifierModelImpl implements ImageClassifierModel {
   ): Promise<Array<{ className: string; probability: number }>> {
 
     const logits = this.infer(img) as tf.Tensor2D
+    // print_tensor( logits )
 
     const classes = await getTopKClasses(logits, topk, this.classes)
 
