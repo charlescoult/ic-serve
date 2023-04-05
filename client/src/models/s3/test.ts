@@ -3,12 +3,15 @@ import * as tf from '@tensorflow/tfjs'
 
 // import { CLASSES } from './classes'
 const classes_url = "https://fungi-models.s3.us-west-1.amazonaws.com/GBIF/google.inaturalist.inception_v3.03/classes.json"
-const model_url = "https://fungi-models.s3.us-west-1.amazonaws.com/GBIF/2023_03_30-07_22_16/model.json"
+const versions = {
+  '0.1.0': "https://fungi-models.s3.us-west-1.amazonaws.com/GBIF/google.inaturalist.inception_v3.03/model.json",
+  '0.2.0': "https://fungi-models.s3.us-west-1.amazonaws.com/GBIF/2023_03_30-07_22_16/model.json",
+}
 
 
 const IMAGE_SIZE = 299
 
-export async function load(): Promise<ImageClassifierModel> {
+export async function load( version ): Promise<ImageClassifierModel> {
   if (tf == null) {
     throw new Error(
       `Cannot find TensorFlow.js. If you are using a <script> tag, please ` +
@@ -23,7 +26,7 @@ export async function load(): Promise<ImageClassifierModel> {
   const CLASSES = await response.json()
 
   const model = new ImageClassifierModelImpl(
-    model_url,
+    versions[ version ],
     inputMin,
     inputMax,
     CLASSES,
