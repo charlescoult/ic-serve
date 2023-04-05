@@ -24,11 +24,13 @@ const API = app => {
 
 	console.log(__dirname)
 
+	/*
 	app.use(
 		'/tfjs/model',
 		// Express.static(path.join(__dirname, "models/google.inaturalist.inception_v3.03"))
 		Express.static(path.join(__dirname, "models/Xception.03"))
 	)
+	*/
 
 }
 
