@@ -20,6 +20,7 @@ import {
   Button,
   TextField,
   LinearProgress,
+  Link,
 } from '@mui/material'
 
 // import '@tensorflow/tfjs-backend-webgl'
@@ -434,10 +435,17 @@ const HomePage = ({ ...props }) => {
                     {submitting ? (
                       <Skeleton />
                     ) : (
-                    result.className +
-                      ': ' +
-                      (100 * result.probability).toFixed(2) +
-                      '%'
+                      <Link
+                        href={ "https://www.inaturalist.org/search?q=" + result.className }
+                        target="_blank"
+                      >
+                        {
+                          result.className +
+                            ': ' +
+                            (100 * result.probability).toFixed(2) +
+                            '%'
+                        }
+                      </Link>
                     )}
                   </Typography>
                   <LinearProgress
