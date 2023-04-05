@@ -1,10 +1,9 @@
 // import * as tfconv from '@tensorflow/tfjs-converter'
 import * as tf from '@tensorflow/tfjs'
 
-import { CLASSES } from './classes'
+const classes_url = 'models/test/classes.json'
 
 const IMAGE_SIZE = 299
-const NUM_CLASSES = 200
 
 export async function load(): Promise<ImageClassifierModel> {
   if (tf == null) {
@@ -17,10 +16,14 @@ export async function load(): Promise<ImageClassifierModel> {
   const inputMin = 0
   const inputMax = 1
 
+  const response = await fetch( classes_url )
+  const CLASSES = await response.json()
+
   const model = new ImageClassifierModelImpl(
     "models/test/model.json",
     inputMin,
     inputMax,
+    CLASSES,
   )
   await model.load()
   return model
@@ -63,6 +66,7 @@ class ImageClassifierModelImpl implements ImageClassifierModel {
     public modelUrl: string | tf.io.IOHandler,
     public inputMin = -1,
     public inputMax = 1,
+    public classes,
   ) {
     this.normalizationConstant = (inputMax - inputMin) / 255.0
   }
@@ -154,12 +158,14 @@ class ImageClassifierModelImpl implements ImageClassifierModel {
 
     const logits = this.infer(img) as tf.Tensor2D
 
-    const classes = await getTopKClasses(logits, topk)
+    const classes = await getTopKClasses(logits, topk, this.classes)
 
     logits.dispose()
 
     return classes
   }
+
+  
 }
 
 function print_tensor( t ){
@@ -170,6 +176,7 @@ function print_tensor( t ){
 async function getTopKClasses(
   logits: tf.Tensor2D,
   topK: number,
+  classes: list,
 ): Promise<Array<{ className: string; probability: number }>> {
   // const softmax = tf.softmax(logits)
   // const values = await softmax.data()
@@ -195,9 +202,10 @@ async function getTopKClasses(
   const topClassesAndProbs = []
   for (let i = 0; i < topkIndices.length; i++) {
     topClassesAndProbs.push({
-      className: CLASSES[topkIndices[i]],
+      className: classes[topkIndices[i] - 1],
       probability: topkValues[i],
     })
   }
   return topClassesAndProbs
 }
+

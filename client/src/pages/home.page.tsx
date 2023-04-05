@@ -3,6 +3,8 @@ import React, { useEffect, useState, useContext, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 
 import {
+  Dialog,
+  DialogTitle,
   FormControl,
   InputLabel,
   Select,
@@ -23,9 +25,9 @@ import {
 // import '@tensorflow/tfjs-backend-webgl'
 import * as tf from '@tensorflow/tfjs'
 
-import * as MobileNet from '@tensorflow-models/mobilenet'
+// import MobileNet from 'models/mobilenet/model'
+//import * as MobileNet from '@tensorflow-models/mobilenet'
 import * as TestNet from 'models/test/test'
-import * as FungiNet from 'models/gbif/test'
 import * as S3Net from 'models/s3/test'
 
 import LoadModelService from 'services/loadModelService'
@@ -35,25 +37,34 @@ const modelUrl = 'models/test/model.json'
 const defaultNumResults = 5
 
 const models = [
+  /*
   {
-    'name': 'MobileNet',
+    'name': 'MobileNet (ImageNet)',
     'modelBase': MobileNet,
   },
+   */
   {
-    'name': 'BirdNet',
+    'name': 'CUB v0.1.0',
     'modelBase': TestNet,
   },
   {
-    'name': 'FungiNet',
-    'modelBase': FungiNet,
+    'name': 'GBIF v0.1.0',
+    'modelBase': S3Net,
+    'version': '0.1.0',
   },
   {
-    'name': 'S3Net',
+    'name': 'GBIF v0.2.0',
     'modelBase': S3Net,
+    'version': '0.2.0',
   },
 ]
 
 const defaultModelSelection = 0
+
+const get_random_value = _list => {
+  const randomIndex = Math.floor( Math.random() * _list.length )
+  return _list[ randomIndex ]
+}
 
 const HomePage = ({ ...props }) => {
 
@@ -85,7 +96,7 @@ const HomePage = ({ ...props }) => {
       setError(undefined)
       setLoadingModel(true)
       console.log("loading Model")
-      models[modelSelection].modelBase.load().then( model => {
+      models[modelSelection].modelBase.load( models[modelSelection].version || null ).then( model => {
         console.log("done loading  Model")
         setLoadedModel(model)
         setLoadingModel(false)
@@ -172,7 +183,14 @@ const HomePage = ({ ...props }) => {
       setError({
         message: 'Error loading file:',
         file: image,
-      })
+        help: (
+          <>
+            { 'The file likely has Cross Origin Resource Sharing disabled.' }
+            <br />
+            { 'Try downloading the file and loading it from your device.' }
+          </>
+        ),
+      }) 
       setSubmitting(false)
     }
   }
@@ -184,6 +202,7 @@ const HomePage = ({ ...props }) => {
       alignItems="stretch"
       onSubmit={handleSubmit(onSubmit)}
     >
+
       <Paper elevation={3}>
         <Typography
           variant="h5"
@@ -215,6 +234,9 @@ const HomePage = ({ ...props }) => {
                   labelId='modelSelection-label'
                   label="Select a model"
                   { ...field }
+                  sx={ {
+                    minWidth: 200,
+                  } }
                 >
                   {
                     models.map( (model, index) => (
@@ -229,6 +251,37 @@ const HomePage = ({ ...props }) => {
               </FormControl>
             ) }
           />
+
+          <Button
+            disabled={ submitting || loadingModel }
+            variant="outlined"
+            href={ 
+              "https://www.inaturalist.org/search?q=" +
+            ( loadedModel ? get_random_value( loadedModel.classes ) : 'test' )
+            }
+            target="_blank"
+          >
+            Search iNaturalist for random class
+          </Button>
+
+
+          {/*
+              loadedModel && (
+              <Stack
+              spacing={ 1 }
+              alignItems="center"
+              padding={ 2 }
+              >
+              {
+              loadedModel.classes ? loadedModel.classes.map( ( _class, index ) => (
+              <div key = { index } >
+              {_class}
+              </div>
+              ) ) : "SDF"
+              }
+              </Stack>
+              )
+            */}
 
           { /*
                <FormControl
@@ -308,13 +361,23 @@ const HomePage = ({ ...props }) => {
 
           {error && (
             <Alert severity="error">
-              {error.message}
-              {error.file && (
+              { error.message }
+              { error.file && (
                 <>
                   <br />
-                  {error.file}
+                  { error.file }
                 </>
-              )}
+              ) }
+              { error.help && (
+                <>
+                  <Box
+                    sx={ {
+                      paddingTop: 1,
+                    } }
+                  />
+                  { error.help }
+                </>
+              ) }
             </Alert>
           )}
 
@@ -410,6 +473,24 @@ const HomePage = ({ ...props }) => {
           )}
         </Paper>
       )}
+
+      <Dialog
+        open={ loadingModel }
+      >
+        <Paper
+          as={ Box }
+          sx={ {
+            padding: 3,
+          } }
+        >
+          <Typography
+            variant='h5'
+          >
+            Loading Model...
+          </Typography>
+        </Paper>
+      </Dialog>
+
     </Stack>
   )
 }

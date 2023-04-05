@@ -22,6 +22,7 @@ export async function load(): Promise<ImageClassifierModel> {
     "/tfjs/model/model.json",
     inputMin,
     inputMax,
+    
   )
 
   await model.load()
@@ -60,7 +61,6 @@ class ImageClassifierModelImpl implements ImageClassifierModel {
   // such that:
   // out = (in / 255.0) * (inputMax - inputMin) + inputMin;
   private normalizationConstant: number
-  private CLASSES
 
   constructor(
     public modelUrl: string | tf.io.IOHandler,
@@ -70,7 +70,7 @@ class ImageClassifierModelImpl implements ImageClassifierModel {
     this.normalizationConstant = (inputMax - inputMin) / 255.0
 
     axios.get( '/tfjs/model/classes.json' ).then( response => {
-      this.CLASSES = eval(response.data)
+      this.classes = eval(response.data)
     } )
 
   }
